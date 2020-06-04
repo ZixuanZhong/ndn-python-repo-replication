@@ -16,11 +16,12 @@ class CommandHandle():
 
     def listen(self):
         # listen on interests
+        logging.info('Start Listening on : {}\n'.format(self.prefix))
         self.app.route(self.prefix)(self._on_interest)
 
     def _on_interest(self, int_name, _int_param, _app_param):
         # logging.info('Interest Received: {}\n'.format(Name.to_str(int_name)))
-        logging.info('Interest Received\n')
+        logging.info('Interest Received')
 
         # an invalid Interest which has the exactly same name as the catalog's prefix
         if(len(int_name)==len(self.prefix)):
@@ -28,7 +29,7 @@ class CommandHandle():
 
         sqls = self.decode_sql(int_name, self.prefix)
 
-        logging.info('SQLs Executed: {}\n'.format(sqls))
+        logging.info('SQLs Executed: {}'.format(sqls))
 
         results = self.execute_sqls(sqls)
 

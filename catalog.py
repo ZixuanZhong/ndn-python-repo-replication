@@ -6,7 +6,7 @@ from ndn.app import NDNApp
 from replication.catalog.command_handle import CommandHandle
 
 def main():
-    parser = argparse.ArgumentParser(description='catalog')
+    parser = argparse.ArgumentParser(description='python catalog.py')
     parser.add_argument('-d', '--database_file',
                         required=True, help='Path to (sqlite3) database file')
     parser.add_argument('-p', '--prefix',

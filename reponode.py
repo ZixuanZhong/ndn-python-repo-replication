@@ -17,7 +17,7 @@ async def cmd(command_client : CommandClient, period : int, files):
         await command_client.update()
 
 def main():
-    parser = argparse.ArgumentParser(description='reponode')
+    parser = argparse.ArgumentParser(description='python reponode.py')
     parser.add_argument('-r', '--repo_prefix',
                         required=True, help='Prefix of Repo ("/217B/repo")')
     parser.add_argument('-c', '--catalog_prefix',

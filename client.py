@@ -10,11 +10,11 @@ from replication.reponode import CommandClient, InsertHandle, DeleteHandle
 from replication.tlv_models import DatainfoTlvModel
 
 async def send(app : NDNApp, name : FormalName):
-    logging.info('Interest Sent: {}\n'.format(Name.to_str(name)))
+    logging.info('Interest Sent: {}'.format(Name.to_str(name)))
     try:
         data_name, meta_info, content = await app.express_interest( name, must_be_fresh=True, can_be_prefix=False, nonce=gen_nonce(), lifetime=1000)
         # Print out Data Name, MetaInfo and its conetnt.
-        logging.info('Data Received: {}\n'.format(Name.to_str(data_name)))
+        logging.info('Data Received: {}'.format(Name.to_str(data_name)))
     except InterestNack as e:
         # A NACK is received
         logging.warning(f'Interest Nacked with reason={e.reason}\n')
@@ -26,7 +26,7 @@ async def send(app : NDNApp, name : FormalName):
     
 
 def main():
-    parser = argparse.ArgumentParser(description='reponode')
+    parser = argparse.ArgumentParser(description='python client.py')
     parser.add_argument('-n', '--node_prefix',
                         required=True, help='Prefix of catalog ("/217B/repo/node/A")')
     parser.add_argument('-c', '--command',
@@ -54,7 +54,7 @@ def main():
 
     name.append(datainfo_name_component)
     
-    logging.info(name)
+    # logging.info(name)
     
     try:
         app.run_forever(after_start=send(app, name))

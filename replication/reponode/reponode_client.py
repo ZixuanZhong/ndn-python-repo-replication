@@ -29,7 +29,7 @@ class ReponodeClient():
         name.append(Component.from_str(verb))
         datainfo_name_component = Component.from_bytes(datainfo.encode())
         name.append(datainfo_name_component)
-        logging.info('Interest Sent: {}\n'.format(Name.to_str(name)))
+        logging.info('Interest Sent: {}'.format(Name.to_str(name)))
         try:
             data_name, meta_info, content = await self.app.express_interest(name, must_be_fresh=True, can_be_prefix=False, nonce=gen_nonce(), lifetime=1000)
             logging.info('Data Received: {}\n'.format(Name.to_str(data_name)))

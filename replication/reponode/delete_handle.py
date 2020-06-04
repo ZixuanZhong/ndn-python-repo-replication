@@ -22,6 +22,7 @@ class DeleteHandle():
 
     def listen(self):
         # listen on interests
+        logging.info('Start Listening on : {}\n'.format(Name.to_str(self.node_delete_prefix)))
         self.app.route(self.node_delete_prefix)(self._on_delete_interest)
 
     def _on_delete_interest(self, int_name, _int_param, _app_param):

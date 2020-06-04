@@ -55,20 +55,20 @@ class CommandClient():
         name = Name.normalize(self.catalog_prefix)
         name.append(sqls_name_component)
         # logging.info('Interest Sent: {}\n'.format(Name.to_str(name)))
-        logging.info('Interest Sent\n')
+        logging.info('Interest Sent')
         try:
             data_name, meta_info, content = await self.app.express_interest(name, must_be_fresh=True, can_be_prefix=False, nonce=gen_nonce(), lifetime=1000)
             # logging.info('Data Received: {}\n'.format(Name.to_str(data_name)))
-            logging.info('Data Received\n')
+            logging.info('Data Received')
             # print(meta_info)
             # print(bytes(content) if content else None)
         except InterestNack as e:
             # A NACK is received
-            logging.warning(f'Interest Nacked with reason={e.reason}\n')
+            logging.warning(f'Interest Nacked with reason={e.reason}')
             return []
         except InterestTimeout:
             # Interest times out
-            logging.warning(f'Interest Timeout\n')
+            logging.warning(f'Interest Timeout')
             return []
         results = self.parse_results(content)
         # logging.info(results)
@@ -85,7 +85,7 @@ class CommandClient():
 
     async def register(self, files):
         num = 2
-        logging.info('Catalog Command: REGISTER\n')
+        logging.info('Catalog Command: REGISTER')
         now = time.time()
         sqls = [ \
         'REPLACE INTO nodes (id, node_name, valid_thru, updated_at) VALUES( (SELECT id FROM nodes WHERE node_name="{0}"), "{0}",{1:.0f},{2:.0f});'.format(self.node_name, now+self.update_period, now), \
@@ -96,7 +96,7 @@ class CommandClient():
         await self.recover(sql_results[1], files)
 
     async def recover(self, previous_files, current_files):
-        logging.info('Catalog Command: RECOVER\n')
+        logging.info('Catalog Command: RECOVER')
         previous_files = list(map(lambda x: x[1], previous_files))
 
         if len(current_files) >= (len(previous_files)/2):
@@ -125,7 +125,7 @@ class CommandClient():
     async def add(self, data_name :str, hash : str, desired_copies : int=3):
         num = 2
         # now = time.time()
-        logging.info('Catalog Command: ADD {} {} {}\n'.format(data_name, hash, desired_copies))
+        logging.info('Catalog Command: ADD {} {} {}'.format(data_name, hash, desired_copies))
         sqls = [ \
         'INSERT OR IGNORE INTO data (data_name, hash, desired_copies) VALUES("{0}","{1}",{2:d});'.format(data_name, hash, desired_copies), \
         'INSERT OR IGNORE INTO data_nodes (data_id, node_id) VALUES((SELECT DISTINCT id FROM data WHERE data_name="{0}"),(SELECT DISTINCT id FROM nodes WHERE node_name="{1}"));'.format(data_name, self.node_name)]
@@ -135,7 +135,7 @@ class CommandClient():
 
     async def update(self):
         num = 4
-        logging.info('Catalog Command: UPDATE\n')
+        logging.info('Catalog Command: UPDATE')
         now = time.time()
         sqls = [ \
         'UPDATE nodes SET valid_thru={0:.0f}, updated_at={1:.0f} WHERE node_name="{2}";'.format(now+self.update_period, now, self.node_name), \
@@ -196,22 +196,27 @@ class CommandClient():
 
     async def remove(self, data_name :str, hash : str):
         num = 1
-        logging.info('Catalog Command: REMOVE {} {}\n'.format(data_name, hash))
+        logging.info('Catalog Command: REMOVE {} {}'.format(data_name, hash))
         sqls = [ \
-        'UPDATE data SET desired_copies=0 WHERE data_name="{0}" AND hash="{1}";'.format(data_name, hash)]
+        'UPDATE data SET desired_copies=0 WHERE data_name="{0}" AND hash="{1}";'.format(data_name, hash), \
+        'DELETE FROM data_nodes WHERE \
+        id=(SELECT A.id FROM data_nodes A, data B, nodes C \
+        WHERE A.data_id=B.id AND A.node_id=C.id AND \
+        B.data_name="{0}" AND B.hash="{1}" AND C.node_name="{2}");'.format(data_name, hash, self.node_name)]
         sql_results = await self.send_sqls(sqls)
         # remove data locally and send RECALL as confirmation
-        await self.recall(data_name, hash)
+        # await self.recall(data_name, hash)
 
     async def recall(self, data_name :str, hash : str):
         num = 1
-        logging.info('Catalog Command: RECALL {} {}\n'.format(data_name, hash))
+        logging.info('Catalog Command: RECALL {} {}'.format(data_name, hash))
         sqls = [ \
         'DELETE FROM data_nodes WHERE \
         id=(SELECT A.id FROM data_nodes A, data B, nodes C \
         WHERE A.data_id=B.id AND A.node_id=C.id AND \
         B.data_name="{0}" AND B.hash="{1}" AND C.node_name="{2}");'.format(data_name, hash, self.node_name)]
         sql_results = await self.send_sqls(sqls)
+        logging.info('\n')
 
     async def replicate(self, active_nodes, data):
         if len(active_nodes) == 0:
@@ -236,9 +241,11 @@ class CommandClient():
             name = Name.normalize(self.repo_prefix)
             name.extend(Name.normalize(candidate_nodes[index]))
 
+            logging.info('Replication {} to {}'.format(data_name, Name.to_str(name)))
+
             insert_success = await self.reponode_client.insert(name, data_name, hash)
             index += 1
         if insert_success == 0:
-            logging.warning('Replication failed after {} trials'.format(len(candidate_nodes)))    
+            logging.warning('Replication failed after {} trials\n'.format(len(candidate_nodes)))    
 
     

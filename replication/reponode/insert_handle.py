@@ -22,6 +22,7 @@ class InsertHandle():
 
     def listen(self):
         # listen on interests
+        logging.info('Start Listening on : {}\n'.format(Name.to_str(self.node_insert_prefix)))
         self.app.route(self.node_insert_prefix)(self._on_insert_interest)
 
     def _on_insert_interest(self, int_name, _int_param, _app_param):
