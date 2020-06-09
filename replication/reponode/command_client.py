@@ -1,9 +1,3 @@
-# -----------------------------------------------------------------------------
-# NDN Repo Replication - Catalog Command Client.
-#
-# @Author 
-# @Date   
-# -----------------------------------------------------------------------------
 import time
 import asyncio as aio
 import logging
